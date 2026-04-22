@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Full Control</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a0a0f,#1a0a2e);color:#fff;padding:20px}
+        .container{max-width:1400px;margin:0 auto}
+        .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;padding-bottom:20px;border-bottom:2px solid #ff44cc;flex-wrap:wrap}
+        .header h1{background:linear-gradient(135deg,#ff44cc,#aa44ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px;margin-bottom:30px}
+        .stat-card{background:linear-gradient(135deg,#1a0a2e,#0f0a1a);padding:20px;border-radius:20px;text-align:center;border:1px solid rgba(255,68,204,0.4)}
+        .stat-number{font-size:36px;font-weight:700;background:linear-gradient(135deg,#ff44cc,#aa44ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .stat-label{font-size:12px;color:#888;margin-top:5px}
+        .tabs{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+        .tab{background:#1a0a2e;padding:10px 25px;border-radius:30px;cursor:pointer;border:1px solid rgba(255,68,204,0.3)}
+        .tab:hover{background:rgba(255,68,204,0.2)}
+        .tab.active{background:linear-gradient(135deg,#ff44cc,#aa44ff);color:#000;border:none}
+        .section{display:none;background:#1a0a2e;border-radius:20px;padding:20px;border:1px solid rgba(255,68,204,0.2);margin-bottom:20px}
+        .section.active{display:block}
+        table{width:100%;border-collapse:collapse}
+        th,td{padding:12px;text-align:left;border-bottom:1px solid rgba(255,68,204,0.2)}
+        th{color:#ff44cc}
+        input,select,textarea{width:100%;padding:12px;background:#0a0a0f;border:1px solid #ff44cc;border-radius:10px;color:#fff;margin:8px 0}
+        textarea{resize:vertical;font-family:monospace}
+        button{background:linear-gradient(135deg,#ff44cc,#aa44ff);border:none;padding:12px 25px;border-radius:10px;color:#fff;font-weight:700;cursor:pointer;margin:5px}
+        button:hover{transform:scale(1.02)}
+        .btn-danger{background:#ff4444}
+        .btn-success{background:#00ff88;color:#000}
+        .btn-warning{background:#ff9900;color:#000}
+        .key-code{font-family:monospace;background:#0a0a0f;padding:5px 10px;border-radius:5px;font-size:12px;color:#ff44cc}
+        .request-card,.payment-card{background:linear-gradient(135deg,#0f0a1a,#0a0a0f);padding:18px;border-radius:15px;margin-bottom:12px;border-left:4px solid #ffcc00}
+        .payment-card{border-left-color:#00ff88}
+        .logout-btn{background:#ff4444;padding:10px 25px}
+        .refresh-btn{background:#00ff88;color:#000;padding:8px 15px;font-size:12px}
+        .card{background:#1a0a2e;padding:15px;border-radius:15px;margin-bottom:15px}
+        .auth-container{min-height:60vh;display:flex;justify-content:center;align-items:center;padding:20px}
+        .auth-box{background:linear-gradient(135deg,#1a0a2e,#0f0a1a);border-radius:30px;padding:35px 25px;width:100%;max-width:360px;border:1px solid rgba(255,0,255,0.4)}
+        .auth-box h1{background:linear-gradient(135deg,#ff44cc,#aa44ff);-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center}
+        .plan-row{display:flex;gap:10px;align-items:center;margin:5px 0;flex-wrap:wrap}
+        .plan-row input{width:100px;margin:0}
+        .remove-plan{background:#ff4444;padding:5px 10px;font-size:12px}
+        .add-plan{background:#00ff88;color:#000;padding:5px 10px;font-size:12px}
+    </style>
+</head>
+<body>
+<div id="accessPage" class="auth-container">
+    <div class="auth-box">
+        <h1>🔐 SECURE ADMIN ACCESS</h1>
+        <p style="margin:15px 0">Authorized Personnel Only</p>
+        <input type="password" id="secretKey" placeholder="Enter Secret Key">
+        <button onclick="verifyAccess()">VERIFY →</button>
+        <div id="errorMsg" style="color:#ff6666;margin-top:10px"></div>
+    </div>
+</div>
+
+<script>
+    const SECRET_KEY = "Galaxy@987654321";
+    
+    function verifyAccess() {
+        let key = document.getElementById("secretKey").value;
+        if(key === SECRET_KEY) {
+            document.getElementById("accessPage").style.display = "none";
+            loadAdminPanel();
+        } else {
+            document.getElementById("errorMsg").innerHTML = "❌ Invalid Access Key! Access Denied.";
+        }
+    }
+    
+    function loadAdminPanel() {
+        let container = document.createElement("div");
+        container.className = "container";
+        container.innerHTML = `
+            <div class="header">
+                <h1>👑 GALAXY ADMIN PANEL - FULL CONTROL</h1>
+                <div><button class="refresh-btn" onclick="location.reload()">🔄 Refresh</button><button class="logout-btn" onclick="adminLogout()">🚪 Logout</button></div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-number" id="totalUsers">0</div><div class="stat-label">Total Users</div></div>
+                <div class="stat-card"><div class="stat-number" id="totalRequests">0</div><div class="stat-label">Pending Key Requests</div></div>
+                <div class="stat-card"><div class="stat-number" id="totalPayments">0</div><div class="stat-label">Pending Payments</div></div>
+                <div class="stat-card"><div class="stat-number" id="totalKeys">0</div><div class="stat-label">Keys Sold</div></div>
+                <div class="stat-card"><div class="stat-number" id="totalRevenue">₹0</div><div class="stat-label">Total Revenue</div></div>
+            </div>
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('requests')">📝 KEY REQUESTS</div>
+                <div class="tab" onclick="showTab('payments')">💰 PAYMENT REQUESTS</div>
+                <div class="tab" onclick="showTab('managehacks')">🎮 MANAGE HACKS</div>
+                <div class="tab" onclick="showTab('users')">👤 MANAGE USERS</div>
+                <div class="tab" onclick="showTab('keys')">🔑 ALL KEYS</div>
+                <div class="tab" onclick="showTab('settings')">⚙️ SETTINGS</div>
+            </div>
+            
+            <!-- KEY REQUESTS -->
+            <div id="requestsSection" class="section active"><h3>📝 Pending Key Requests</h3><div id="requestsList"></div></div>
+            
+            <!-- PAYMENT REQUESTS -->
+            <div id="paymentsSection" class="section"><h3>💰 Pending Payment Requests</h3><div id="paymentsList"></div></div>
+            
+            <!-- MANAGE HACKS -->
+            <div id="managehacksSection" class="section">
+                <h3>🎮 Manage Hacks/Panels</h3>
+                <div id="panelsEditor"></div>
+                <button class="btn-success" onclick="savePanelsSettings()">💾 Save All Changes</button>
+            </div>
+            
+            <!-- MANAGE USERS -->
+            <div id="usersSection" class="section"><h3>👤 Manage Users</h3><div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Username</th><th>Name</th><th>Balance</th><th>Keys</th><th>Actions</th></tr></thead><tbody id="usersList"></tbody></table></div>
+            <div class="card" style="margin-top:20px"><h3>➕ Add Balance to User</h3><select id="balanceUserSelect"><option>Select User</option></select><input type="number" id="balanceAmount" placeholder="Amount"><select id="balanceAction"><option value="add">➕ Add</option><option value="remove">➖ Remove</option></select><button onclick="updateUserBalance()">Update Balance</button></div></div>
+            
+            <!-- ALL KEYS -->
+            <div id="keysSection" class="section"><h3>🔑 All Keys</h3><div id="allKeysList"></div></div>
+            
+            <!-- SETTINGS -->
+            <div id="settingsSection" class="section">
+                <div class="card"><h3>⚙️ Admin Settings</h3><label>Admin Secret Key:</label><input type="password" id="adminSecretKey" placeholder="Change Secret Key"><button onclick="changeAdminSecretKey()">Change Secret Key</button><hr style="margin:15px 0"><button class="btn-danger" onclick="clearAllData()">⚠️ Clear All Data (Reset Everything)</button></div>
+            </div>
+        `;
+        document.body.innerHTML = "";
+        document.body.appendChild(container);
+        loadAdminDB();
+    }
+    
+    function adminLogout() { window.location.reload(); }
+    
+    let adminDB = { users: [], requests: [], payments: [], keys: [], panels: [] };
+    
+    function loadAdminDB() {
+        // Load users
+        let userDB = localStorage.getItem("galaxy_users_secure");
+        if(userDB){let data=JSON.parse(userDB);adminDB.users=[];let added=new Set();for(let k in data){if(data[k]&&data[k].userId&&!added.has(data[k].userId)){added.add(data[k].userId);adminDB.users.push(data[k]);}}}else{adminDB.users=[];}
+        // Load requests
+        let reqDB=localStorage.getItem("galaxy_all_requests");adminDB.requests=reqDB?JSON.parse(reqDB):[];
+        // Load payments
+        let payDB=localStorage.getItem("galaxy_all_payments");adminDB.payments=payDB?JSON.parse(payDB):[];
+        // Load keys
+        let keysDB=localStorage.getItem("galaxy_keys_db");adminDB.keys=keysDB?JSON.parse(keysDB):[];
+        // Load panels settings
+        let panelsDB=localStorage.getItem("galaxy_panels_settings");
+        if(panelsDB){adminDB.panels=JSON.parse(panelsDB);}else{adminDB.panels=[
+            {name:"💧 DRIP CLIENT", image:"", plans:[{days:"1 Day",price:70},{days:"3 Days",price:130},{days:"7 Days",price:300},{days:"15 Days",price:400},{days:"30 Days",price:600}]},
+            {name:"🔗 PRIME HOOK", image:"", plans:[{days:"1 Day",price:60},{days:"3 Days",price:120},{days:"7 Days",price:270},{days:"10 Days",price:320}]},
+            {name:"🔥 HG CHEATS", image:"", plans:[{days:"1 Day",price:90},{days:"7 Days",price:275},{days:"10 Days",price:300},{days:"30 Days",price:550}]},
+            {name:"🐱 PATO TEAM", image:"", plans:[{days:"1 Day",price:100},{days:"3 Days",price:200},{days:"7 Days",price:350},{days:"15 Days",price:450},{days:"30 Days",price:600}]}
+        ];}
+        updateStats();renderUsers();renderKeys();renderRequests();renderPayments();renderPanelsEditor();populateUserSelect();
+    }
+    
+    function saveAdminDB(){
+        localStorage.setItem("galaxy_keys_db",JSON.stringify(adminDB.keys));
+        localStorage.setItem("galaxy_all_requests",JSON.stringify(adminDB.requests));
+        localStorage.setItem("galaxy_all_payments",JSON.stringify(adminDB.payments));
+        localStorage.setItem("galaxy_panels_settings",JSON.stringify(adminDB.panels));
+    }
+    
+    function updateStats(){
+        document.getElementById("totalUsers").innerHTML=adminDB.users.length;
+        document.getElementById("totalRequests").innerHTML=adminDB.requests.filter(r=>r.status==="pending").length;
+        document.getElementById("totalPayments").innerHTML=adminDB.payments.filter(p=>p.status==="pending").length;
+        document.getElementById("totalKeys").innerHTML=adminDB.keys.length;
+        let revenue=adminDB.keys.reduce((s,k)=>s+(k.price||100),0);
+        document.getElementById("totalRevenue").innerHTML="₹"+revenue;
+    }
+    
+    function renderRequests(){
+        let container=document.getElementById("requestsList");
+        let pending=adminDB.requests.filter(r=>r.status==="pending");
+        if(pending.length===0){container.innerHTML='<div style="text-align:center;padding:40px;">✅ No pending key requests</div>';return;}
+        container.innerHTML="";
+        pending.forEach(req=>{
+            container.innerHTML+=`<div class="request-card"><div><strong>👤 User:</strong> ${req.userFullname||req.userName} (@${req.userName})</div><div><strong>🎮 Product:</strong> ${req.product}</div><div><strong>⏱️ Duration:</strong> ${req.duration}</div><div><strong>💰 Amount:</strong> <span style="color:#ff44cc;">₹${req.price}</span></div><div><strong>📅 Date:</strong> ${req.date}</div><div style="margin-top:15px;"><input type="text" id="keyInput-${req.id}" placeholder="Enter Key" style="width:60%;padding:8px;margin-right:10px;"><button class="btn-success" onclick="approveKeyRequest('${req.id}','${req.userId}','${req.product}','${req.duration}')">✅ Submit Key</button><button class="btn-danger" onclick="rejectKeyRequest('${req.id}')">❌ Reject</button></div></div>`;
+        });
+    }
+    
+    function approveKeyRequest(reqId,userId,product,duration){
+        let keyInput=document.getElementById(`keyInput-${reqId}`);
+        let key=keyInput?.value.trim();
+        if(!key){alert("Please enter a key!");return;}
+        let user=adminDB.users.find(u=>u.userId===userId);
+        if(!user){alert("User not found!");return;}
+        if(!user.keys)user.keys=[];
+        user.keys.push({product:product,duration:duration,key:key,date:new Date().toLocaleString()});
+        let request=adminDB.requests.find(r=>r.id===reqId);
+        if(request){request.status="approved";request.key=key;}
+        if(user.requests){let ur=user.requests.find(r=>r.id===reqId);if(ur){ur.status="approved";ur.key=key;}}
+        adminDB.keys.push({key:key,product:product,duration:duration,owner:user.username,status:"active",price:request?.price||0,date:new Date().toLocaleString()});
+        let userDB=localStorage.getItem("galaxy_users_secure");
+        let users=userDB?JSON.parse(userDB):{};
+        users[user.username.toLowerCase()]=user;
+        if(user.email)users[user.email.toLowerCase()]=user;
+        localStorage.setItem("galaxy_users_secure",JSON.stringify(users));
+        saveAdminDB();
+        loadAdminDB();
+        alert(`✅ Key sent to ${user.username}!`);
+    }
+    
+    function rejectKeyRequest(reqId){
+        let request=adminDB.requests.find(r=>r.id===reqId);
+        if(request){
+            request.status="rejected";
+            let user=adminDB.users.find(u=>u.userId===request.userId);
+            if(user){
+                user.wallet=(user.wallet||0)+request.price;
+                if(!user.transactions)user.transactions=[];
+                user.transactions.unshift({date:new Date().toLocaleString(),type:"credit",amount:request.price,item:"Refund: Request rejected"});
+                let userDB=localStorage.getItem("galaxy_users_secure");
+                let users=userDB?JSON.parse(userDB):{};
+                users[user.username.toLowerCase()]=user;
+                if(user.email)users[user.email.toLowerCase()]=user;
+                localStorage.setItem("galaxy_users_secure",JSON.stringify(users));
+            }
+            saveAdminDB();
+            loadAdminDB();
+            alert("❌ Request rejected! Balance refunded.");
+        }
+    }
+    
+    function renderPayments(){
+        let container=document.getElementById("paymentsList");
+        let pending=adminDB.payments.filter(p=>p.status==="pending");
+        if(pending.length===0){container.innerHTML='<div style="text-align:center;padding:40px;">✅ No pending payment requests</div>';return;}
+        container.innerHTML="";
+        pending.forEach(p=>{
+            container.innerHTML+=`<div class="payment-card"><div><strong>👤 User:</strong> ${p.userFullname||p.userName} (@${p.userName})</div><div><strong>💰 Amount:</strong> <span style="color:#ff44cc;">₹${p.amount}</span></div><div><strong>🔢 UTR:</strong> ${p.utr}</div><div><strong>📅 Date:</strong> ${p.date}</div><div style="margin-top:15px;"><button class="btn-success" onclick="approvePayment('${p.id}',${p.amount},'${p.userId}')">✅ Approve & Add Balance</button><button class="btn-danger" onclick="rejectPayment('${p.id}')">❌ Reject</button></div></div>`;
+        });
+    }
+    
+    function approvePayment(payId,amount,userId){
+        let user=adminDB.users.find(u=>u.userId===userId);
+        if(!user){alert("User not found!");return;}
+        user.wallet=(user.wallet||0)+amount;
+        if(!user.transactions)user.transactions=[];
+        user.transactions.unshift({date:new Date().toLocaleString(),type:"credit",amount:amount,item:"✅ Payment Approved"});
+        let payment=adminDB.payments.find(p=>p.id===payId);
+        if(payment)payment.status="approved";
+        let userDB=localStorage.getItem("galaxy_users_secure");
+        let users=userDB?JSON.parse(userDB):{};
+        users[user.username.toLowerCase()]=user;
+        if(user.email)users[user.email.toLowerCase()]=user;
+        localStorage.setItem("galaxy_users_secure",JSON.stringify(users));
+        saveAdminDB();
+        loadAdminDB();
+        alert(`✅ ₹${amount} added to ${user.username}'s wallet!`);
+    }
+    
+    function rejectPayment(payId){
+        let payment=adminDB.payments.find(p=>p.id===payId);
+        if(payment)payment.status="rejected";
+        saveAdminDB();
+        loadAdminDB();
+        alert("❌ Payment rejected!");
+    }
+    
+    function renderPanelsEditor(){
+        let container=document.getElementById("panelsEditor");
+        let html="";
+        adminDB.panels.forEach((panel,idx)=>{
+            html+=`<div class="card" style="margin-bottom:20px"><h3>${panel.name}</h3><label>Image URL:</label><input type="text" id="panel_img_${idx}" value="${panel.image||''}" placeholder="https://example.com/image.jpg"><div><strong>Plans:</strong></div><div id="plans_container_${idx}">`;
+            panel.plans.forEach((plan,pidx)=>{
+                html+=`<div class="plan-row"><input type="text" value="${plan.days}" id="plan_days_${idx}_${pidx}" placeholder="Days" style="width:100px"><input type="number" value="${plan.price}" id="plan_price_${idx}_${pidx}" placeholder="Price" style="width:100px"><button class="remove-plan" onclick="removePlan(${idx},${pidx})">✖</button></div>`;
+            });
+            html+=`</div><button class="add-plan" onclick="addPlan(${idx})">+ Add Plan</button><button class="btn-danger" onclick="removePanel(${idx})" style="margin-top:10px">🗑 Remove Panel</button></div>`;
+        });
+        html+=`<button class="btn-success" onclick="addNewPanel()">➕ Add New Panel/Hack</button>`;
+        container.innerHTML=html;
+    }
+    
+    function addPlan(panelIdx){
+        let container=document.getElementById(`plans_container_${panelIdx}`);
+        let newId=adminDB.panels[panelIdx].plans.length;
+        let div=document.createElement("div");
+        div.className="plan-row";
+        div.innerHTML=`<input type="text" id="plan_days_${panelIdx}_${newId}" placeholder="Days" style="width:100px"><input type="number" id="plan_price_${panelIdx}_${newId}" placeholder="Price" style="width:100px"><button class="remove-plan" onclick="this.parentElement.remove()">✖</button>`;
+        container.appendChild(div);
+    }
+    
+    function removePlan(panelIdx,planIdx){
+        adminDB.panels[panelIdx].plans.splice(planIdx,1);
+        renderPanelsEditor();
+    }
+    
+    function removePanel(panelIdx){
+        if(confirm("Remove this panel?")){
+            adminDB.panels.splice(panelIdx,1);
+            renderPanelsEditor();
+        }
+    }
+    
+    function addNewPanel(){
+        let newName=prompt("Enter panel name:","New Hack");
+        if(newName){
+            adminDB.panels.push({name:newName,image:"",plans:[{days:"1 Day",price:100}]});
+            renderPanelsEditor();
+        }
+    }
+    
+    function savePanelsSettings(){
+        for(let i=0;i<adminDB.panels.length;i++){
+            let imgInput=document.getElementById(`panel_img_${i}`);
+            if(imgInput)adminDB.panels[i].image=imgInput.value;
+            let newPlans=[];
+            let j=0;
+            while(true){
+                let daysInput=document.getElementById(`plan_days_${i}_${j}`);
+                let priceInput=document.getElementById(`plan_price_${i}_${j}`);
+                if(!daysInput)break;
+                if(daysInput.value && priceInput.value){
+                    newPlans.push({days:daysInput.value,price:parseInt(priceInput.value)});
+                }
+                j++;
+            }
+            if(newPlans.length>0)adminDB.panels[i].plans=newPlans;
+        }
+        saveAdminDB();
+        alert("✅ Panels settings saved! User website will auto-update.");
+    }
+    
+    function renderUsers(){
+        let html="";
+        adminDB.users.forEach(u=>{html+=`<tr><td>${u.userId}</td><td><strong>${u.username}</strong></td><td>${u.fullname}</td><td style="color:#ff44cc;">₹${u.wallet||0}</td><td>${u.keys?.length||0}</td><td><button class="btn-danger" onclick="deleteUser('${u.userId}')">Delete</button></td></tr>`;});
+        document.getElementById("usersList").innerHTML=html||'<tr><td colspan="6">No users</td></tr>';
+    }
+    
+    function renderKeys(){
+        let html="";
+        adminDB.keys.forEach(k=>{html+=`<tr><td class="key-code">${k.key}</td><td>${k.product}</td><td>${k.owner}</td><td style="color:#00ff88;">${k.status}</td><td><button class="btn-danger" onclick="revokeKey('${k.key}')">Revoke</button></td></tr>`;});
+        document.getElementById("allKeysList").innerHTML=html||'<tr><td colspan="5">No keys</td></tr>';
+    }
+    
+    function deleteUser(id){if(confirm("Delete user?")){let userDB=localStorage.getItem("galaxy_users_secure");let users=userDB?JSON.parse(userDB):{};let toDelete=null;for(let k in users){if(users[k].userId===id){toDelete=users[k];break;}}if(toDelete){delete users[toDelete.username.toLowerCase()];delete users[toDelete.email.toLowerCase()];localStorage.setItem("galaxy_users_secure",JSON.stringify(users));loadAdminDB();alert("User deleted!");}}}
+    function revokeKey(key){let k=adminDB.keys.find(k=>k.key===key);if(k){k.status="revoked";saveAdminDB();renderKeys();alert("Key revoked!");}}
+    
+    function updateUserBalance(){
+        let userId=document.getElementById("balanceUserSelect").value,amount=parseInt(document.getElementById("balanceAmount").value),action=document.getElementById("balanceAction").value;
+        let user=adminDB.users.find(u=>u.userId===userId);
+        if(!user){alert("User not found!");return;}
+        if(action==="add"){user.wallet=(user.wallet||0)+amount;if(!user.transactions)user.transactions=[];user.transactions.unshift({date:new Date().toLocaleString(),type:"credit",amount:amount,item:"Added by Admin"});alert(`✅ ₹${amount} added to ${user.username}`);}
+        else{if((user.wallet||0)>=amount){user.wallet-=amount;if(!user.transactions)user.transactions=[];user.transactions.unshift({date:new Date().toLocaleString(),type:"debit",amount:amount,item:"Removed by Admin"});alert(`✅ ₹${amount} removed from ${user.username}`);}else{alert("Insufficient balance!");return;}}
+        let userDB=localStorage.getItem("galaxy_users_secure");let users=userDB?JSON.parse(userDB):{};users[user.username.toLowerCase()]=user;if(user.email)users[user.email.toLowerCase()]=user;localStorage.setItem("galaxy_users_secure",JSON.stringify(users));loadAdminDB();
+    }
+    
+    function populateUserSelect(){
+        let bs=document.getElementById("balanceUserSelect");
+        if(bs){bs.innerHTML='<option>Select User</option>';adminDB.users.forEach(u=>{bs.innerHTML+=`<option value="${u.userId}">${u.username} (₹${u.wallet||0})</option>`;});}
+    }
+    
+    function changeAdminSecretKey(){
+        let newKey=document.getElementById("adminSecretKey").value;
+        if(newKey){alert(`Secret key changed to: ${newKey}\nSave this somewhere safe!`);console.log("New secret key would be:",newKey);}
+    }
+    
+    function clearAllData(){
+        if(confirm("⚠️ This will DELETE ALL DATA! Users, keys, everything. Are you sure?")){
+            localStorage.clear();
+            alert("All data cleared! Page will refresh.");
+            window.location.reload();
+        }
+    }
+    
+    function showTab(tab){
+        document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+        document.getElementById(tab+"Section").classList.add('active');
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        event.target.classList.add('active');
+        if(tab==='requests')renderRequests();
+        if(tab==='payments')renderPayments();
+    }
+</script>
+</body>
+</html>

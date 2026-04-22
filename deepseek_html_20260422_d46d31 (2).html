@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Galaxy Shop - Buy Premium Keys</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a0a0f,#1a0a2e);color:#fff}
+        .auth-container{min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+        .auth-box{background:linear-gradient(135deg,#1a0a2e,#0f0a1a);border-radius:30px;padding:35px 25px;width:100%;max-width:360px;border:1px solid rgba(255,0,255,0.4);box-shadow:0 0 30px rgba(255,0,255,0.1)}
+        .auth-box h1{background:linear-gradient(135deg,#ff44cc,#aa44ff);-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center}
+        .auth-input{width:100%;padding:14px;background:#0a0a0f;border:1px solid #ff44cc;border-radius:25px;color:#fff;margin:8px 0}
+        .auth-btn{width:100%;padding:14px;background:linear-gradient(135deg,#ff44cc,#aa44ff);border:none;border-radius:25px;color:#fff;font-weight:700;margin-top:20px;cursor:pointer}
+        .switch-link{text-align:center;margin-top:20px;font-size:13px}
+        .switch-link span{color:#ff44cc;cursor:pointer}
+        .main-app{display:none}
+        .top-bar{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;background:rgba(26,10,46,0.95);border-bottom:1px solid #ff44cc}
+        .menu-btn{font-size:28px;cursor:pointer;background:0 0;border:none;color:#fff}
+        .logo h2{background:linear-gradient(135deg,#ff44cc,#aa44ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .side-menu{position:fixed;top:0;left:-280px;width:280px;height:100%;background:linear-gradient(180deg,#0f0a1a,#0a0a0f);z-index:2000;transition:.3s;padding:20px;border-right:1px solid #ff44cc}
+        .side-menu.open{left:0}
+        .menu-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1999;display:none}
+        .menu-overlay.open{display:block}
+        .menu-header{text-align:center;padding:20px 0;border-bottom:1px solid #ff44cc;margin-bottom:20px}
+        .menu-header h3{color:#ff44cc}
+        .menu-item{display:flex;align-items:center;gap:12px;padding:14px;margin:5px 0;border-radius:15px;cursor:pointer}
+        .menu-item:hover{background:rgba(255,68,204,0.1)}
+        .menu-logout{margin-top:30px;border-top:1px solid #ff44cc;padding-top:20px;color:#ff6666}
+        .content-section{display:none;padding:20px;padding-bottom:30px}
+        .content-section.active{display:block}
+        .balance-card{background:linear-gradient(135deg,#1a0a2e,#0f0a1a);margin-bottom:20px;padding:25px;border-radius:25px;text-align:center;border:1px solid rgba(255,68,204,0.4);cursor:pointer}
+        .balance-amount{font-size:42px;font-weight:700;background:linear-gradient(135deg,#ff44cc,#aa44ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:20px}
+        .stat-card{background:#1a0a2e;padding:20px;border-radius:20px;text-align:center;border:1px solid rgba(255,68,204,0.2)}
+        .stat-value{font-size:32px;font-weight:700;background:linear-gradient(135deg,#ff44cc,#aa44ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .join-card{background:linear-gradient(135deg,#ff44cc,#aa44ff);margin-bottom:20px;padding:15px;border-radius:20px;text-align:center;cursor:pointer}
+        .join-card p{color:#fff;font-weight:700}
+        .top-sellers{background:#1a0a2e;border-radius:20px;padding:15px;margin-bottom:20px;border:1px solid rgba(255,68,204,0.2)}
+        .seller-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,68,204,0.2)}
+        .menu-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+        .menu-grid-item{background:#1a0a2e;padding:15px;border-radius:15px;text-align:center;cursor:pointer;border:1px solid rgba(255,68,204,0.2)}
+        .menu-grid-icon{font-size:24px}
+        .profile-settings{background:#1a0a2e;border-radius:20px;padding:15px;text-align:center;cursor:pointer;border:1px solid rgba(255,68,204,0.2)}
+        .panel-item{background:#1a0a2e;padding:15px;border-radius:15px;margin-bottom:12px;border:1px solid rgba(255,68,204,0.2)}
+        .panel-plans{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+        .plan-select{background:#0a0a0f;padding:6px 12px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid #ff44cc}
+        .plan-select.selected{background:linear-gradient(135deg,#ff44cc,#aa44ff);color:#fff}
+        .panel-image{width:100%;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px}
+        .key-item{background:#1a0a2e;padding:12px;border-radius:12px;margin-bottom:10px;border:1px solid rgba(255,68,204,0.2)}
+        .key-code{font-family:monospace;background:#0a0a0f;padding:8px;border-radius:10px;margin:8px 0;color:#ff44cc;word-break:break-all}
+        .toast{position:fixed;bottom:30px;left:20px;right:20px;background:linear-gradient(135deg,#ff44cc,#aa44ff);color:#fff;padding:12px;border-radius:30px;text-align:center;z-index:4000;display:none;font-weight:700}
+        .deposit-btn{background:#1a0a2e;padding:15px;border-radius:15px;text-align:center;margin-bottom:10px;cursor:pointer;border:1px solid rgba(255,68,204,0.3)}
+    </style>
+</head>
+<body>
+
+<div id="loginPage" class="auth-container">
+    <div class="auth-box">
+        <h1>🌌 GALAXY SHOP</h1>
+        <p style="text-align:center;font-size:12px;color:#888;margin-bottom:20px;">Premium Panel Store - Login</p>
+        <input type="text" id="loginUsername" class="auth-input" placeholder="Username / Email">
+        <input type="password" id="loginPassword" class="auth-input" placeholder="Password">
+        <button class="auth-btn" onclick="doLogin()">LOGIN →</button>
+        <div class="switch-link">Don't have an account? <span onclick="showRegister()">Register Now</span></div>
+        <div id="loginError" style="color:#ff6666;font-size:12px;text-align:center;margin-top:10px;"></div>
+    </div>
+</div>
+
+<div id="registerPage" class="auth-container" style="display:none">
+    <div class="auth-box">
+        <h1>🌌 GALAXY SHOP</h1>
+        <p style="text-align:center;font-size:12px;color:#888;margin-bottom:20px;">Create New Account</p>
+        <input type="text" id="regFullname" class="auth-input" placeholder="Full Name">
+        <input type="text" id="regUsername" class="auth-input" placeholder="Username">
+        <input type="email" id="regEmail" class="auth-input" placeholder="Email Address">
+        <input type="password" id="regPassword" class="auth-input" placeholder="Password">
+        <input type="password" id="regConfirmPassword" class="auth-input" placeholder="Confirm Password">
+        <button class="auth-btn" onclick="doRegister()">REGISTER →</button>
+        <div class="switch-link">Already have account? <span onclick="showLogin()">Login Now</span></div>
+        <div id="regError" style="color:#ff6666;font-size:12px;text-align:center;margin-top:10px;"></div>
+        <div id="regSuccess" style="color:#ff44cc;font-size:12px;text-align:center;margin-top:10px;"></div>
+    </div>
+</div>
+
+<div id="sideMenu" class="side-menu">
+    <div class="menu-header"><h3 id="menuUsername">User</h3><p style="font-size:11px;color:#888;">Reseller Partner</p></div>
+    <div class="menu-item" onclick="showSection('profile')"><span>👤</span> <span>My Profile</span></div>
+    <div class="menu-item" onclick="showSection('deposit')"><span>💰</span> <span>Wallet Balance</span></div>
+    <div class="menu-item menu-logout" onclick="logout()"><span>🚪</span> <span>Log Out</span></div>
+</div>
+<div id="menuOverlay" class="menu-overlay" onclick="closeMenu()"></div>
+
+<div id="mainApp" class="main-app">
+    <div class="top-bar">
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <div class="logo"><h2>GALAXY SHOP</h2></div>
+        <div>👤 <span id="topUsername" style="color:#ff44cc;"></span></div>
+    </div>
+
+    <div id="dashboardSection" class="content-section active">
+        <div class="balance-card" onclick="showSection('deposit')">
+            <div style="font-size:12px;color:#888;">YOUR CURRENT BALANCE</div>
+            <div class="balance-amount" id="walletAmount">₹0</div>
+            <div style="font-size:10px;color:#ff44cc;">👇 Tap to Add Funds</div>
+        </div>
+        <div class="join-card" onclick="window.open('https://t.me/galaxy_shop','_blank')"><p>📢 JOIN ALL UPDATE FOR RESELLERS</p><p style="font-size:10px;">Stay updated with latest product stocks and news.</p><p style="font-size:12px;margin-top:5px;">JOIN NOW →</p></div>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="todaySell">0</div><div>TODAY SELL</div><div style="font-size:10px;color:#666;">U:0 R:0 ME:0</div></div>
+            <div class="stat-card"><div class="stat-value" id="myUsers">0</div><div>MY USERS</div><div style="font-size:10px;color:#666;">U:0</div></div>
+            <div class="stat-card"><div class="stat-value" id="monthlySell">0</div><div>MONTHLY SELL</div><div style="font-size:10px;color:#666;">U:0 R:0 ME:0</div></div>
+            <div class="stat-card"><div class="stat-value" id="myResellers">0</div><div>MY RESELLERS</div><div style="font-size:10px;color:#666;">U:0</div></div>
+        </div>
+        <div class="top-sellers"><div style="font-weight:bold;margin-bottom:15px;">🏆 5 TOP SELLERS</div><div id="topSellersList"></div></div>
+        <div class="menu-grid">
+            <div class="menu-grid-item" onclick="showSection('deposit')"><div class="menu-grid-icon">💰</div><div>DEPOSIT</div></div>
+            <div class="menu-grid-item" onclick="showSection('buykeys')"><div class="menu-grid-icon">🔑</div><div>BUY KEYS</div></div>
+            <div class="menu-grid-item" onclick="showSection('mykeys')"><div class="menu-grid-icon">🎫</div><div>MY KEYS</div></div>
+            <div class="menu-grid-item" onclick="showSection('history')"><div class="menu-grid-icon">📜</div><div>HISTORY</div></div>
+        </div>
+        <div class="profile-settings" onclick="showSection('profile')">⚙️ PROFILE SETTINGS</div>
+    </div>
+
+    <div id="depositSection" class="content-section">
+        <h3 style="margin-bottom:15px;">💰 Add Funds</h3>
+        <div class="deposit-btn" onclick="addFunds(100)">₹100</div>
+        <div class="deposit-btn" onclick="addFunds(200)">₹200</div>
+        <div class="deposit-btn" onclick="addFunds(500)">₹500</div>
+        <div class="deposit-btn" onclick="addFunds(1000)">₹1000</div>
+        <div class="deposit-btn" onclick="customFunds()">Custom Amount</div>
+        <button class="auth-btn" onclick="showSection('dashboard')" style="margin-top:15px;">← Back to Home</button>
+    </div>
+
+    <div id="buykeysSection" class="content-section">
+        <h3 style="margin-bottom:15px;">🔑 Buy Keys</h3>
+        <div id="panelsList"></div>
+        <button class="auth-btn" onclick="showSection('dashboard')" style="margin-top:15px;">← Back to Home</button>
+    </div>
+
+    <div id="mykeysSection" class="content-section">
+        <h3 style="margin-bottom:15px;">🎫 My Keys</h3>
+        <div id="keysList"></div>
+        <button class="auth-btn" onclick="showSection('dashboard')" style="margin-top:15px;">← Back to Home</button>
+    </div>
+
+    <div id="historySection" class="content-section">
+        <h3 style="margin-bottom:15px;">📜 Transaction History</h3>
+        <div id="historyList"></div>
+        <button class="auth-btn" onclick="showSection('dashboard')" style="margin-top:15px;">← Back to Home</button>
+    </div>
+
+    <div id="profileSection" class="content-section">
+        <h3 style="margin-bottom:15px;">⚙️ Profile Settings</h3>
+        <div class="panel-item">
+            <div><strong>Username:</strong> <span id="profileUsername"></span></div>
+            <div style="margin-top:10px;"><strong>Full Name:</strong> <span id="profileFullname"></span></div>
+            <div style="margin-top:10px;"><strong>Email:</strong> <span id="profileEmail"></span></div>
+            <div style="margin-top:10px;"><strong>User ID:</strong> <span id="profileUserId"></span></div>
+            <div style="margin-top:10px;"><strong>Balance:</strong> <span id="profileBalance" style="color:#ff44cc;"></span></div>
+        </div>
+        <button class="auth-btn" onclick="logout()" style="background:#ff6666;">Logout</button>
+        <button class="auth-btn" onclick="showSection('dashboard')" style="margin-top:10px;">← Back to Home</button>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    // Default panels data (will be overridden by admin settings)
+    let panelsData = [
+        {name:"💧 DRIP CLIENT", image:"", plans:[{days:"1 Day",price:70},{days:"3 Days",price:130},{days:"7 Days",price:300},{days:"15 Days",price:400},{days:"30 Days",price:600}]},
+        {name:"🔗 PRIME HOOK", image:"", plans:[{days:"1 Day",price:60},{days:"3 Days",price:120},{days:"7 Days",price:270},{days:"10 Days",price:320}]},
+        {name:"🔥 HG CHEATS", image:"", plans:[{days:"1 Day",price:90},{days:"7 Days",price:275},{days:"10 Days",price:300},{days:"30 Days",price:550}]},
+        {name:"🐱 PATO TEAM", image:"", plans:[{days:"1 Day",price:100},{days:"3 Days",price:200},{days:"7 Days",price:350},{days:"15 Days",price:450},{days:"30 Days",price:600}]}
+    ];
+
+    // Load custom panels from admin settings
+    function loadPanelsFromSettings() {
+        let saved = localStorage.getItem("galaxy_panels_settings");
+        if(saved) {
+            try {
+                let customPanels = JSON.parse(saved);
+                if(customPanels && customPanels.length) {
+                    panelsData = customPanels;
+                }
+            } catch(e) {}
+        }
+    }
+
+    function getAllUsers(){let u=localStorage.getItem("galaxy_users_secure");if(!u){let init={};let demo={fullname:"Demo User",username:"demouser",email:"user@demo.com",password:"1234",userId:"USR"+Date.now(),wallet:0,totalSpent:0,keys:[],requests:[],transactions:[],createdAt:new Date().toISOString()};init[demo.username.toLowerCase()]=demo;init[demo.email.toLowerCase()]=demo;localStorage.setItem("galaxy_users_secure",JSON.stringify(init));return init;}return JSON.parse(u);}
+    function saveAllUsers(u){localStorage.setItem("galaxy_users_secure",JSON.stringify(u))}
+    function saveUserToDB(u){let users=getAllUsers();users[u.username.toLowerCase()]=u;users[u.email.toLowerCase()]=u;saveAllUsers(users)}
+    function getUserByIdentifier(id){let users=getAllUsers();return users[id.toLowerCase()]||null}
+    function userExists(u,e){let users=getAllUsers();return users[u.toLowerCase()]||users[e.toLowerCase()]}
+
+    const topSellers=[{rank:1,name:"@syahrulnewera",type:"RESELLER"},{rank:2,name:"@Namzbro",type:"RESELLER"},{rank:3,name:"@DARKBHAI",type:"RESELLER"},{rank:4,name:"@Nirvan",type:"RESELLER"},{rank:5,name:"@Jituuuu",type:"RESELLER"}];
+
+    let currentUser=null,selectedPanel=null;
+
+    function doRegister(){
+        let fn=document.getElementById("regFullname").value.trim(),un=document.getElementById("regUsername").value.trim(),em=document.getElementById("regEmail").value.trim(),pw=document.getElementById("regPassword").value,cf=document.getElementById("regConfirmPassword").value;
+        if(!fn||!un||!em||!pw){document.getElementById("regError").innerText="All fields required!";return}
+        if(pw!==cf){document.getElementById("regError").innerText="Passwords don't match!";return}
+        if(pw.length<4){document.getElementById("regError").innerText="Password min 4 chars!";return}
+        if(userExists(un,em)){document.getElementById("regError").innerText="User exists!";return}
+        let newUser={fullname:fn,username:un,email:em,password:pw,userId:"USR"+Date.now(),wallet:0,totalSpent:0,keys:[],requests:[],transactions:[],createdAt:new Date().toISOString()};
+        saveUserToDB(newUser);
+        document.getElementById("regSuccess").innerText="Account created! Please login.";
+        setTimeout(()=>showLogin(),1500);
+    }
+
+    function doLogin(){
+        let id=document.getElementById("loginUsername").value.trim(),pw=document.getElementById("loginPassword").value;
+        if(!id||!pw){document.getElementById("loginError").innerText="Enter details!";return}
+        let user=getUserByIdentifier(id);
+        if(!user){document.getElementById("loginError").innerText="User not found! Please register.";return}
+        if(user.password!==pw){document.getElementById("loginError").innerText="Wrong password!";return}
+        currentUser=user;
+        sessionStorage.setItem("galaxy_session",JSON.stringify({username:currentUser.username,userId:currentUser.userId,timestamp:Date.now()}));
+        document.getElementById("loginPage").style.display="none";
+        document.getElementById("registerPage").style.display="none";
+        document.getElementById("mainApp").style.display="block";
+        updateUI();
+        renderPanels();
+        showToast("Welcome "+currentUser.fullname);
+    }
+
+    function updateUI(){
+        document.getElementById("menuUsername").innerHTML=currentUser.username;
+        document.getElementById("topUsername").innerHTML=currentUser.username;
+        document.getElementById("walletAmount").innerHTML="₹"+currentUser.wallet;
+        document.getElementById("profileUsername").innerHTML=currentUser.username;
+        document.getElementById("profileFullname").innerHTML=currentUser.fullname;
+        document.getElementById("profileEmail").innerHTML=currentUser.email;
+        document.getElementById("profileUserId").innerHTML=currentUser.userId;
+        document.getElementById("profileBalance").innerHTML="₹"+currentUser.wallet;
+        let today=currentUser.transactions?.filter(t=>t.type==='debit'&&new Date(t.date).toDateString()===new Date().toDateString()).length||0;
+        document.getElementById("todaySell").innerHTML=today;
+        document.getElementById("monthlySell").innerHTML=currentUser.keys?.length||0;
+        let sellersHtml="";topSellers.forEach(s=>{sellersHtml+=`<div class="seller-item"><span>#${s.rank}</span><span>${s.name}</span><span style="color:#ff44cc;">${s.type}</span></div>`});
+        document.getElementById("topSellersList").innerHTML=sellersHtml;
+        renderKeys();
+        renderHistory();
+        saveCurrentUser();
+    }
+    function saveCurrentUser(){saveUserToDB(currentUser);}
+
+    function renderPanels(){
+        loadPanelsFromSettings();
+        let container=document.getElementById("panelsList");container.innerHTML="";
+        panelsData.forEach(panel=>{
+            let div=document.createElement("div");div.className="panel-item";
+            let imgHtml=panel.image?`<img src="${panel.image}" class="panel-image" onerror="this.style.display='none'">`:'';
+            let plansHtml='<div class="panel-plans">';
+            panel.plans.forEach(plan=>{plansHtml+=`<span class="plan-select" data-price="${plan.price}" data-days="${plan.days}">${plan.days} (₹${plan.price})</span>`});
+            plansHtml+='</div>';
+            div.innerHTML=`${imgHtml}<div class="panel-name">${panel.name}</div>${plansHtml}<button class="auth-btn" style="margin-top:10px;" data-panel-name="${panel.name}">BUY KEY →</button>`;
+            container.appendChild(div);
+        });
+        document.querySelectorAll('.plan-select').forEach(plan=>{
+            plan.addEventListener('click',(e)=>{e.stopPropagation();let parent=plan.closest('.panel-item');parent.querySelectorAll('.plan-select').forEach(p=>p.classList.remove('selected'));plan.classList.add('selected');});
+        });
+        document.querySelectorAll('[data-panel-name]').forEach(btn=>{
+            btn.addEventListener('click',()=>{
+                let parent=btn.closest('.panel-item'),selected=parent.querySelector('.plan-select.selected'),panelName=btn.dataset.panelName;
+                if(selected){
+                    let price=parseInt(selected.dataset.price),days=selected.dataset.days;
+                    if(currentUser.wallet>=price){
+                        currentUser.wallet-=price;
+                        let request={id:"REQ"+Date.now(),product:panelName,duration:days,price:price,status:"pending",date:new Date().toLocaleString(),key:null};
+                        if(!currentUser.requests)currentUser.requests=[];
+                        currentUser.requests.unshift(request);
+                        currentUser.transactions.unshift({date:new Date().toLocaleString(),type:"debit",amount:price,item:panelName+" ("+days+") - Request Sent"});
+                        let allRequests=localStorage.getItem("galaxy_all_requests");
+                        allRequests=allRequests?JSON.parse(allRequests):[];
+                        allRequests.push({id:request.id,userId:currentUser.userId,userName:currentUser.username,userFullname:currentUser.fullname,product:panelName,duration:days,price:price,status:"pending",date:request.date});
+                        localStorage.setItem("galaxy_all_requests",JSON.stringify(allRequests));
+                        saveCurrentUser();
+                        updateUI();
+                        showToast(`✅ Request sent! Admin will provide key soon.`);
+                    }else{showToast(`Insufficient balance! Need ₹${price}. Add funds first.`);showSection('deposit');}
+                }else{showToast("Select a plan first!");}
+            });
+        });
+    }
+
+    function renderKeys(){
+        let container=document.getElementById("keysList");
+        if(!currentUser.keys||currentUser.keys.length===0){container.innerHTML='<div style="text-align:center;padding:40px;color:#888;">🔑 No keys purchased yet</div>';return;}
+        container.innerHTML="";
+        currentUser.keys.forEach(key=>{
+            let div=document.createElement("div");div.className="key-item";
+            div.innerHTML=`<div style="font-weight:bold;">${key.product} (${key.duration})</div><div class="key-code">${key.key}</div><div style="font-size:10px;color:#888;">${key.date}</div><button class="auth-btn" style="margin-top:8px;padding:6px;" onclick="copyText('${key.key}')">Copy Key</button>`;
+            container.appendChild(div);
+        });
+    }
+
+    function renderHistory(){
+        let container=document.getElementById("historyList");
+        if(!currentUser.transactions||currentUser.transactions.length===0){container.innerHTML='<div style="text-align:center;padding:40px;color:#888;">No transactions</div>';return;}
+        container.innerHTML="";
+        currentUser.transactions.slice().reverse().forEach(txn=>{
+            let div=document.createElement("div");div.className="key-item";
+            div.innerHTML=`<div>${txn.type==='credit'?'💰 +':'🔑 -'} ₹${txn.amount}</div><div style="font-size:11px;color:#888;">${txn.item}</div><div style="font-size:10px;color:#666;">${txn.date}</div>`;
+            container.appendChild(div);
+        });
+    }
+
+    function addFunds(amount){currentUser.wallet+=amount;currentUser.transactions.unshift({date:new Date().toLocaleString(),type:"credit",amount:amount,item:"Added Funds"});saveCurrentUser();updateUI();showToast(`✅ ₹${amount} added to wallet!`);}
+    function customFunds(){let amt=prompt("Enter amount (₹):","100");if(amt&&!isNaN(amt)&&parseFloat(amt)>0){addFunds(parseFloat(amt));}else{showToast("Invalid amount!");}}
+
+    function copyText(text){navigator.clipboard.writeText(text);showToast("Copied!");}
+    function showToast(msg){let t=document.getElementById("toast");t.innerText=msg;t.style.display="block";setTimeout(()=>t.style.display="none",2500);}
+    function showLogin(){document.getElementById("loginPage").style.display="flex";document.getElementById("registerPage").style.display="none";}
+    function showRegister(){document.getElementById("loginPage").style.display="none";document.getElementById("registerPage").style.display="flex";}
+    function toggleMenu(){document.getElementById("sideMenu").classList.toggle("open");document.getElementById("menuOverlay").classList.toggle("open");}
+    function closeMenu(){document.getElementById("sideMenu").classList.remove("open");document.getElementById("menuOverlay").classList.remove("open");}
+    function showSection(section){document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));document.getElementById(section+"Section").classList.add('active');closeMenu();}
+    function logout(){if(confirm("Logout?")){sessionStorage.removeItem("galaxy_session");currentUser=null;document.getElementById("mainApp").style.display="none";document.getElementById("loginPage").style.display="flex";closeMenu();}}
+    function checkSession(){let session=sessionStorage.getItem("galaxy_session");if(session){let data=JSON.parse(session);if(Date.now()-data.timestamp<86400000){let user=getUserByIdentifier(data.username);if(user){currentUser=user;document.getElementById("loginPage").style.display="none";document.getElementById("mainApp").style.display="block";updateUI();renderPanels();}}else{sessionStorage.removeItem("galaxy_session");}}}
+    
+    loadPanelsFromSettings();
+    checkSession();
+</script>
+</body>
+</html>
